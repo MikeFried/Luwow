@@ -1,0 +1,49 @@
+#pragma once
+
+#include "Package.h"
+#include "ILuauModule.h"
+
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <filesystem>
+
+namespace Luwow::Engine {
+
+// Tag for the Engine object in the Luau userdata
+#define EngineTag 1
+typedef void (*CompilerCallbackType)(const std::filesystem::path& modulePath, std::string& resultingBytecode);
+typedef void (*MessagePumpCallbackType)();
+
+class Engine {
+public:
+    Engine(Package context, std::filesystem::path filePath);
+    ~Engine();
+
+    // Statically registered internal binary modules, independent of Luau state or Engine.
+    static void registerInternalModule(std::shared_ptr<ILuauModule> module);
+
+    void setCompilerCallback(CompilerCallbackType callback);
+    void setMessagePumpCallback(MessagePumpCallbackType callback);
+
+    // Initializes the Luau State with built-ins
+    void initialize();
+    void initializeRequire();
+    int require(const std::string& moduleName);
+    int loadModuleFromBytecode(lua_State* L, const std::string& moduleName, const std::string& bytecode);
+    void run();
+
+private:
+    lua_State* L;
+    bool usesCompiler;
+    CompilerCallbackType compilerCallback;
+    Package package;
+    std::filesystem::path filePath;
+    bool usesMessagePump;
+    MessagePumpCallbackType messagePumpCallback;
+    // DLLs and internal modules
+    std::unordered_map<std::string, std::shared_ptr<ILuauModule>> modules;
+    std::unordered_map<std::string, int> luauModuleRefs;
+};
+
+} // namespace Luwow::Engine

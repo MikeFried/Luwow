@@ -1,0 +1,26 @@
+#include <iostream>
+#include "LuauCompiler.h"
+
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        // TODO: Make arguments so people don't accidentally write over their last luau script
+        std::cerr << "Usage: lcompile <script.luau> <script2.luau> <script3.luau> ... <output.package>" << std::endl;
+        return 1;
+    }
+    
+    std::cout << "Luau Compiler - Compile Luau Scripts" << std::endl;
+    
+    LuauCompiler compiler;
+    
+    // Execute the script
+    for (int i = 1; i < argc - 1; i++) {
+        std::string scriptPath = argv[i];
+        if (!compiler.compileScript(scriptPath)) {
+            std::cerr << "Failed to compile script: " << scriptPath << std::endl;
+            return 1;
+        }
+    }
+    compiler.savePackage(argv[argc - 1]);
+
+    return 0;
+}
