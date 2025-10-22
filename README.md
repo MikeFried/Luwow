@@ -31,7 +31,7 @@ And 2 libraries:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/MikeFried/Luwow Luwow
+git clone https://github.com/MikeFried/Luwow Luwow --recurse-submodules
 cd Luwow
 ```
 
@@ -43,6 +43,8 @@ cd build
 cmake ..
 cmake --build . --config Release
 ```
+
+Your output binaries are located in the bin/Release folder under build.
 
 ## Usage
 
