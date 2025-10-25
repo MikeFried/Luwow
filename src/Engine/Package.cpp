@@ -43,6 +43,9 @@ std::string Package::getFile(const std::string& filePath) {
     return "";
 }
 
+// Signature is "PKG\1" in ASCII
+static const uint32_t packageSignature = 0x474B5001;
+
 bool Package::save(const std::string& packagePath) {
     this->packagePath = packagePath;
     std::ofstream out(packagePath, std::ios::out | std::ios::binary);
@@ -55,7 +58,8 @@ bool Package::save(const std::string& packagePath) {
     // Simple package format:
     // [script count]
     // Each script: [name length][name][bytecode length][bytecode]
-    // End of file: [total size]
+    // End of file: [total size][4-byte signature]
+
     uint16_t fileCount = static_cast<uint16_t>(fileNames.size());
     out.write(reinterpret_cast<const char*>(&fileCount), sizeof(fileCount));
     uint32_t totalSize = sizeof(fileCount);
@@ -71,9 +75,10 @@ bool Package::save(const std::string& packagePath) {
         totalSize += sizeof(nameLen) + nameLen + sizeof(bytecodeLen) + bytecodeLen;
     }
     out.write(reinterpret_cast<const char*>(&totalSize), sizeof(totalSize));
+    out.write(reinterpret_cast<const char*>(&packageSignature), sizeof(packageSignature));
     out.close();
-    std::cout << "Package saved to " << packagePath << std::endl;
-    std::cout << "Total size: " << (totalSize + sizeof(totalSize)) << " bytes" << std::endl;
+    // std::cout << "Package saved to " << packagePath << std::endl;
+    // std::cout << "Total size: " << (totalSize + sizeof(totalSize) + sizeof(signature)) << " bytes" << std::endl;
     return true;
 }
 
@@ -86,15 +91,22 @@ bool Package::load(const std::string& packagePath) {
         return false;
     }
 
-    // The package may be placed at the end of an executable, so we read the package size
-    // from the end of the file first.
+    // Validate the signature at the end of the file first
+    uint32_t signature;
+    file.seekg(-sizeof(signature), std::ios::end);
+    file.read(reinterpret_cast<char*>(&signature), sizeof(signature));
+    if (signature != packageSignature) {
+        std::cerr << "Invalid signature in package: " << packagePath << std::endl;
+        return false;
+    }
+
+    // Then get the total size from before the signature
 
     // Seek to the end of the file and get the total size
     uint32_t packageSize;
-    file.seekg(-sizeof(packageSize), std::ios::end);
+    file.seekg(-sizeof(packageSize) -sizeof(signature), std::ios::end);
     file.read(reinterpret_cast<char*>(&packageSize), sizeof(packageSize));
 
-    // TODO: Stronger validation of the package with a signature
     file.seekg(0, std::ios::end);
     uint32_t totalSize = file.tellg();
 
@@ -105,7 +117,7 @@ bool Package::load(const std::string& packagePath) {
     }
 
     // Seek back from the end to the beginning of the package in the file
-    file.seekg(totalSize - packageSize - sizeof(packageSize), std::ios::beg);
+    file.seekg(totalSize - packageSize - sizeof(packageSize) - sizeof(signature), std::ios::beg);
 
     uint16_t fileCount = 0;
     file.read(reinterpret_cast<char*>(&fileCount), sizeof(fileCount));
