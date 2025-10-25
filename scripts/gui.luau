@@ -1,4 +1,4 @@
---! @meta
+-- This is the type system for the GUI API as it exists in C++ code.
 export type CommonWindowDescriptor = {
     Left: number?,
     Top: number?,
@@ -17,14 +17,7 @@ export type ButtonDescriptor = CommonWindowDescriptor & {
     OnPressed: () -> boolean,
 }
 
-export type TextBoxDescriptor = CommonWindowDescriptor & {
-    Type: "TextBox",
-    Text: string,
-    MultiLineMode: boolean,
-    Font: string,
-}
-
-export type WindowDescriptors = WindowDescriptor | ButtonDescriptor | TextBoxDescriptor
+export type WindowDescriptors = WindowDescriptor | ButtonDescriptor
 
 export type Window = {
     show: () -> boolean,
