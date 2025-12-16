@@ -73,7 +73,34 @@ Execute Luau scripts from the command line:
 ./lrun test.pkg
 ```
 
+### lremotedebug - VS Code / DAP compatible remote debugger
+
+Attach from VS Code to debug your script.
+
+Depends on [Luau Debugger Extension](https://marketplace.visualstudio.com/items?itemName=sssooonnnggg.luau-debugger)
+
+Add this example to launch.json in .vscode to attach to the debugger.
+
+```json
+        {
+            "name": "attach to luau debugger",
+            "type": "luau",
+            "request": "attach",
+            "address": "localhost",
+            "port": 59000
+        }
+```
+
+You run the command in terminal in the following way before attempting to attach.
+
+```bash
+./lremotedebug 59000 script.luau
+```
+
 ## Acknowledgments
 
 - [Luau](https://github.com/Roblox/luau) - The scripting language and virtual machine
 - [Roblox](https://www.roblox.com/) - For creating and maintaining Luau
+- [sssooonnnggg](https://github.com/sssooonnnggg) - For creating the Luau-Debugger
+- [Google C++ DAP](https://github.com/google/cppdap) - Google C++ Debugger Adapter Protocol
+- [Niels Lohmann JSON](https://github.com/nlohmann/json) - JSON for Modern C++

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(Luwow VERSION 0.1.0 LANGUAGES CXX)
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Set output directories
@@ -12,7 +12,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib_archive)
 
 # Add targets for this project's modules
 add_library(Luwow.Gui STATIC)
-#add_library(Luwow.Gui.dll SHARED)
 add_library(Luwow.Engine STATIC)
 add_executable(Luwow.LCompile)
 add_executable(Luwow.LRun)
@@ -103,3 +102,23 @@ option(LUAU_BUILD_TESTS "Build tests" OFF)
 
 # Add Luau subdirectory
 add_subdirectory(${CMAKE_SOURCE_DIR}/extern/luau)
+
+# Add Google's CPPDAP
+add_subdirectory(${CMAKE_SOURCE_DIR}/extern/cppdap)
+
+# Set up paths for sssooonnnggg/luau-debugger dependencies
+# Luau path
+if(NOT DEFINED LUAU_ROOT)
+  set(LUAU_ROOT ${CMAKE_SOURCE_DIR}/extern/luau)
+endif()
+
+# CPPDAP path
+if(NOT DEFINED CPP_DAP_ROOT)
+  set(CPP_DAP_ROOT ${CMAKE_SOURCE_DIR}/extern/cppdap)
+endif()
+
+# Add Luau.Debugger
+add_subdirectory(${CMAKE_SOURCE_DIR}/extern/luau-debugger/debugger)
+
+# Add LRemoteDebug subdirectory
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/LRemoteDebug)

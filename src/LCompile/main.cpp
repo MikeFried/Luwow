@@ -12,7 +12,8 @@ int main(int argc, char* argv[]) {
     
     LuauCompiler compiler;
     
-    // Execute the script
+    // Compile all files passed in on the command line through the luau compiler
+    // and append them into the package in the order specified on the command line.
     for (int i = 1; i < argc - 1; i++) {
         std::string scriptPath = argv[i];
         if (!compiler.compileScript(scriptPath)) {

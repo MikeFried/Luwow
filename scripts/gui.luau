@@ -14,7 +14,7 @@ export type WindowDescriptor = CommonWindowDescriptor & {
 export type ButtonDescriptor = CommonWindowDescriptor & {
     Type: "Button",
     Caption: string,
-    OnPressed: () -> boolean,
+    OnPressed: () -> (),
 }
 
 export type WindowDescriptors = WindowDescriptor | ButtonDescriptor

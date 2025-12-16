@@ -13,6 +13,7 @@ namespace Luwow::Engine {
 // Tag for the Engine object in the Luau userdata
 #define EngineTag 1
 typedef void (*CompilerCallbackType)(const std::filesystem::path& modulePath, std::string& resultingBytecode);
+typedef void (*DebuggerNewLuauCallbackType)(lua_State* L, const std::string& full_path, bool is_entry);
 typedef void (*MessagePumpCallbackType)();
 
 class Engine {
@@ -24,6 +25,7 @@ public:
     static void registerInternalModule(std::shared_ptr<ILuauModule> module);
 
     void setCompilerCallback(CompilerCallbackType callback);
+    void setDebuggerNewLuauCallback(DebuggerNewLuauCallbackType callback);
     void setMessagePumpCallback(MessagePumpCallbackType callback);
 
     // Initializes the Luau State with built-ins
@@ -33,10 +35,14 @@ public:
     int loadModuleFromBytecode(lua_State* L, const std::string& moduleName, const std::string& bytecode);
     void run();
 
+    lua_State* getMainState() { return L; }
+
 private:
     lua_State* L;
     bool usesCompiler;
     CompilerCallbackType compilerCallback;
+    bool usesDebuggerNewLuauCallback;
+    DebuggerNewLuauCallbackType debuggerNewLuauCallback;
     Package package;
     std::filesystem::path filePath;
     bool usesMessagePump;

@@ -18,7 +18,9 @@ static std::unordered_map<std::string, std::shared_ptr<ILuauModule>> globalModul
 Engine::Engine(Package context, std::filesystem::path filePath) :
     L(nullptr),
     usesCompiler(false),
+    usesDebuggerNewLuauCallback(false),
     compilerCallback(nullptr),
+    debuggerNewLuauCallback(nullptr),
     package(context),
     filePath(filePath),
     usesMessagePump(false),
@@ -39,6 +41,11 @@ Engine::~Engine() {
 void Engine::setCompilerCallback(CompilerCallbackType callback) {
     usesCompiler = true;
     compilerCallback = callback;
+}
+
+void Engine::setDebuggerNewLuauCallback(DebuggerNewLuauCallbackType callback) {
+    usesDebuggerNewLuauCallback = true;
+    debuggerNewLuauCallback = callback;
 }
 
 void Engine::setMessagePumpCallback(MessagePumpCallbackType callback) {
@@ -79,6 +86,10 @@ int Engine::loadModuleFromBytecode(lua_State* L, const std::string& moduleName, 
         luaL_error(L, "Failed to load bytecode for module: %s", lua_tostring(L, -1));
         lua_pop(L, 1);
         return 0;
+    }
+
+    if (usesDebuggerNewLuauCallback) {
+        debuggerNewLuauCallback(L, moduleName, false);
     }
 
     // Execute the module function to get its result
@@ -176,6 +187,10 @@ void Engine::run() {
             if (result != 0) {
                 throw std::runtime_error("Failed to load bytecode for script: " + filePath.string());
             }
+        }
+
+        if (usesDebuggerNewLuauCallback) {
+            debuggerNewLuauCallback(L, filePath.string(), true);
         }
 
         if (lua_pcall(L, 0, 0, 0) != 0) {
